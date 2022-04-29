@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.ex_03_camera_share">
+    package="com.example.ex_05_motiontracking">
 
     <uses-permission android:name="android.permission.CAMERA" />
 
@@ -9,10 +9,10 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="ex_05_motiontracking"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Ex_03_Camera_Share">
+        android:theme="@style/Theme.Ex_05_motionTracking">
         <activity
             android:name=".MainActivity"
             android:exported="true">

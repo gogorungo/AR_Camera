@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Ex_03_Camera_Share"
+rootProject.name = "Ex_05_motionTracking"
 include ':app'

@@ -1,4 +1,4 @@
-package com.example.ex_03_camera_share;
+package com.example.ex_05_motiontracking;
 
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
@@ -8,7 +8,6 @@ import com.google.ar.core.Frame;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 public class CameraPreView {
 

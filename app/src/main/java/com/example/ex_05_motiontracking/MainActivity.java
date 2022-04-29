@@ -1,22 +1,34 @@
-package com.example.ex_03_camera_share;
+package com.example.ex_05_motiontracking;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.hardware.display.DisplayManager;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
+import android.view.MotionEvent;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.ar.core.ArCoreApk;
+import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
+import com.google.ar.core.HitResult;
+import com.google.ar.core.PointCloud;
+import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.exceptions.CameraNotAvailableException;
+
+import java.util.List;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,13 +40,29 @@ public class MainActivity extends AppCompatActivity {
 
     Config mConfig; // ARCore session 설정 정보를 받을 변수
 
+    TextView my_textView;
+
+
+    String ttt = "";
+
+    // 디스플레이 화면의 X, Y
+    float displayX, displayY;
+
+    // 터치 했는지 안했는지
+    boolean mTouched = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 타이틀바 없애기
+        hideStatusBar();
         setContentView(R.layout.activity_main);
 
         mySerView = (GLSurfaceView) findViewById(R.id.glsurfaceview);
+
+        my_textView = (TextView) findViewById(R.id.my_textView);
 
         // MainActivity 의 화면 관리 매니져 --> 화면 변화를 감지 : 현재 시스템에서 서비스 지원 (AppCompatActivity)
         DisplayManager displayManager = (DisplayManager) getSystemService(DISPLAY_SERVICE);
@@ -98,10 +126,98 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // 화면을 바꾸기 위한 작업
-
                 mRenderer.transformDisplayGeometry(frame);
                 // 위랑 똑같은 기능
 //                mRenderer.mCamera.transformDisplayGeometry(frame);
+
+
+
+                // 여기서부터가 PointCloud 설정 구간
+
+                // ARCore 에 정의된 클래스
+                // 현재 프레임에서 특정있는 점들에 대한 포인트 값 (3차원 좌표값)을 받을 객체
+                PointCloud pointCloud = frame.acquirePointCloud();
+
+                // 포인트 값을 적용시키기 위해 mainRenderer -> PointCloud.update() 실행
+                mRenderer.mPointCloud.update(pointCloud);
+
+                // 사용이 끝난 포인트 자원해제 (반드시)
+                pointCloud.release();
+
+                // 화면 터치시 작업 시작
+                if(mTouched){
+
+
+
+//                    Log.d("preRender : ", "건드렸다 : " + displayX + "," + displayY);
+
+                    List<HitResult> arr = frame.hitTest(displayX,displayY);
+
+
+
+//                    Log.d("preRender : ", displayX + "," + displayY + ","+arr);
+
+                    int i = 0;
+
+                    ttt = "";
+                    for(HitResult hr : arr){
+
+                        // 축
+                        Pose pose = hr.getHitPose();
+
+                        float [] xx = pose.getXAxis();
+                        float [] yy = pose.getYAxis();
+                        float [] zz = pose.getZAxis();
+                        
+                        // 센터좌표. qx,qy,qz는 회전
+                        mRenderer.addPoint(pose.tx(),pose.ty(),pose.tz());
+
+                        // x축
+                        mRenderer.addLineX(xx, pose.tx(),pose.ty(),pose.tz());
+                        mRenderer.addLineY(yy, pose.tx(),pose.ty(),pose.tz());
+                        mRenderer.addLineZ(zz, pose.tx(),pose.ty(),pose.tz());
+
+//                        Log.d("arr " + i + " : ", hr.toString());
+
+                        Log.d("arr " + i + " : ", pose.toString());
+
+                        ttt += pose.toString() + "\n";
+
+                        i++;
+                    }
+
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            my_textView.setText(ttt);
+
+                        }
+                    });
+
+                    // 터치 플래그를 초기화
+                    mTouched = false;
+
+                }
+                
+                // 화면 터치시 작업 끝
+                
+                // 카메라 frame 에서 받는다
+                // mPointCloud 에서 렌더링 할때 카메라의 좌표계산을 받아서 처리
+                Camera camera = frame.getCamera();
+
+                float [] projMatrix = new float[16];
+                float [] viewMatrix = new float[16];
+
+                camera.getProjectionMatrix(projMatrix,0,0.1f,100.0f);
+                camera.getViewMatrix(viewMatrix,0);
+
+//                mRenderer.mPointCloud.updateMatrix(viewMatrix, projMatrix);
+
+                mRenderer.updateProjMatrix(projMatrix);
+                mRenderer.updateViewMatrix(viewMatrix);
+
 
             }
         };
@@ -122,6 +238,8 @@ public class MainActivity extends AppCompatActivity {
         mySerView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
     }
+
+
 
     @Override
     protected void onPause() {
@@ -177,6 +295,22 @@ public class MainActivity extends AppCompatActivity {
 
         mySerView.onResume();
 
+//        mySerView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+//        Log.d("MainActivity : ", "건드렸다 : " + event.getX() + ","+ event.getY());
+
+        displayX = event.getX();
+        displayY = event.getY();
+
+
+        // 건드렸으면 true
+        mTouched = true;
+
+        return true;
     }
 
     //카메라 퍼미션 요청
@@ -188,5 +322,13 @@ public class MainActivity extends AppCompatActivity {
                     0
             );
         }
+    }
+
+    void hideStatusBar(){
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+        );
     }
 }

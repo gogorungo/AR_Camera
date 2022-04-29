@@ -1,4 +1,4 @@
-package com.example.ex_03_camera_share;
+package com.example.ex_05_motiontracking;
 
 import org.junit.Test;
 
