@@ -12,22 +12,6 @@ import java.nio.ShortBuffer;
 
 public class Line {
 
-
-//    float [] mColor = new float[4];
-//    void addNoCnt(){
-//        Random random = new Random();
-//        for (int i = 0 ; i<4; i++){
-//            mColor[i] = random.nextFloat();
-//        }
-//
-//        int currNo = 0;
-//
-//        currNo++;
-//
-//        currNo %= mColorsArr.length;
-//    }
-
-
     // 점. 고정되어있으므로 그대로 써야한다
     // GPU 를 이용하여 고속 계산하여 화면 처리하기 위한 코드
     String vertexShaderString =
@@ -88,13 +72,13 @@ public class Line {
 
         // 시작과 끝이므로 두번
         float [] mColor = new float[]{
-                Color.red(color)/255,
-                Color.green(color)/255,
-                Color.blue(color)/255,
+                Color.red(color)/255.f,
+                Color.green(color)/255.f,
+                Color.blue(color)/255.f,
                 1.0f,
-                Color.red(color)/255,
-                Color.green(color)/255,
-                Color.blue(color)/255,
+                Color.red(color)/255.f,
+                Color.green(color)/255.f,
+                Color.blue(color)/255.f,
                 1.0f
         };
 
@@ -165,6 +149,13 @@ public class Line {
 
     int mPositionHandle, mColorHandle, mMVPMatrixHandle;
 
+
+    float lineWidth = 5.0f;
+    void lineWidth(int i){
+        lineWidth = (float) i;
+    }
+
+
     // 도형 그리기 --> MyGLRenderer.onDrawFrame() 에서 호출하여 그리기
     void draw(){
 
@@ -207,8 +198,9 @@ public class Line {
         GLES20.glEnableVertexAttribArray(color);
 
         // 선 두께
-        GLES20.glLineWidth(5.0f);
+//        GLES20.glLineWidth(5.0f);
 
+        GLES20.glLineWidth(lineWidth);
 
         // 그린다
         //                       선으로 그린다,         순서의 보유량,       순서 자료형,      순서 내용

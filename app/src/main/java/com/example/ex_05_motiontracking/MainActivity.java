@@ -9,8 +9,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     TextView my_textView;
 
+    SeekBar seekBar;
 
     String ttt = "";
 
@@ -96,6 +100,36 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } , null);
         }
+
+        findViewById(R.id.blackBtn).setOnClickListener(onClickListener);
+        findViewById(R.id.whiteBtn).setOnClickListener(onClickListener);
+        findViewById(R.id.redBtn).setOnClickListener(onClickListener);
+        findViewById(R.id.greenBtn).setOnClickListener(onClickListener);
+        findViewById(R.id.blueBtn).setOnClickListener(onClickListener);
+
+
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if(b) {
+                    mRenderer.mLineX.lineWidth(i);
+                    mRenderer.mLineY.lineWidth(i);
+                    mRenderer.mLineZ.lineWidth(i);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
 
         MainRenderer.RenderCallBack mr = new MainRenderer.RenderCallBack() {
@@ -238,6 +272,30 @@ public class MainActivity extends AppCompatActivity {
         mySerView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
 
     }
+
+    View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()){
+                case R.id.blackBtn:
+                    mRenderer.sphere.selectNum(0);
+                    break;
+
+                case R.id.whiteBtn:
+                    mRenderer.sphere.selectNum(1);
+                    break;
+                case R.id.redBtn:
+                    mRenderer.sphere.selectNum(2);
+                    break;
+                case R.id.greenBtn:
+                    mRenderer.sphere.selectNum(3);
+                    break;
+                case R.id.blueBtn:
+                    mRenderer.sphere.selectNum(4);
+                    break;
+            }
+        }
+    };
 
 
 

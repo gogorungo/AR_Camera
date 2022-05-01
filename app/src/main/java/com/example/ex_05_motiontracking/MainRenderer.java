@@ -162,10 +162,11 @@ public class MainRenderer implements GLSurfaceView.Renderer {
         // 카피를 Sphere에서 한다면 값을 넘겨줘야한다
 
 
-        sphere.addNoCnt();
+        sphere.addNOCnt();
 
         sphere.setmModelMatrix(matrix);
     }
+
 
     Line mLineX, mLineY, mLineZ;
 //    float [] projMatrix = new float[16];

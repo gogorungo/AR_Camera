@@ -7,19 +7,41 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import java.util.Random;
 
 public class Sphere {
 
 
-    float [] mColor = new float[4];
-    void addNoCnt(){
-        Random random = new Random();
-        for (int i = 0 ; i<4; i++){
-            mColor[i] = random.nextFloat();
-        }
+    int currNO = 0;
+    int selectNum = 0;
+
+
+
+    void addNOCnt(){
+
+        currNO++;
+
+        currNO %= mColorArr.length;
+
     }
 
+    void selectNum(int num){
+        this.selectNum = num;
+        draw();
+    }
+
+    float [][] sColorArr = {
+
+            {0.0f, 0.0f, 0.0f, 0.0f},
+
+            {1.0f, 1.0f, 1.0f, 1.0f},
+
+            {1.0f, 0.0f, 0.0f, 1.0f},
+
+            {0.0f, 1.0f, 0.0f, 1.0f},
+
+            {0.0f, 0.0f, 1.0f, 1.0f},
+
+    };
 
     // 점. 고정되어있으므로 그대로 써야한다
     // GPU 를 이용하여 고속 계산하여 화면 처리하기 위한 코드
@@ -55,8 +77,26 @@ public class Sphere {
 
 
     // 색깔 (빨간색에 가까운 색)
-//    float [] mColor = {0.2f, 0.5f, 0.8f, 1.0f };
+    float [] mColor = {0.2f, 0.5f, 0.8f, 1.0f };
 
+
+
+    float [][] mColorArr = {
+
+            {0.2f, 0.5f, 0.8f, 1.0f},
+
+            {1.0f, 0.5f, 0.2f, 1.0f},
+
+            {1.0f, 1.0f, 0.0f, 1.0f},
+
+            {0.0f, 1.0f, 0.0f, 1.0f},
+
+            {0.2f, 1.0f, 0.8f, 1.0f},
+
+    };
+
+    FloatBuffer[] mColorsArr = new FloatBuffer[mColorArr.length];
+    FloatBuffer[] sColorsArr = new FloatBuffer[sColorArr.length];
 
 
     FloatBuffer mVertices;
@@ -73,7 +113,7 @@ public class Sphere {
 //    float [] colors;
 
     // 버퍼로 만들어서 쪼개 보낸다
-    public Sphere(){
+    public Sphere() {
 
         // 구 모양 점 정보
         // 반지름
@@ -81,10 +121,7 @@ public class Sphere {
 
         // 점의 개수를 분할해서 본다 (3개의 점이 하나의 면을 이룬다(삼각형, 서울랜드의 구 연상))
         // 20 * 20 개의 삼각형으로 이루어진 구
-        float [] vertices = new float[POINT_COUNT * POINT_COUNT * 3];
-
-
-        addNoCnt();
+        float[] vertices = new float[POINT_COUNT * POINT_COUNT * 3];
 
         // 구를 만드는 점의 정보 ---> 수학 개념 필요
         for (int i = 0; i < POINT_COUNT; i++) {
@@ -104,7 +141,7 @@ public class Sphere {
 //        setColors();
 
         // 색상 정보 RGBA (면(삼각형) 갯수 * 4(RGBA))
-        float [] colors = new float[POINT_COUNT * POINT_COUNT * 4];
+        float[] colors = new float[POINT_COUNT * POINT_COUNT * 4];
 
 
         for (int i = 0; i < POINT_COUNT; i++) {
@@ -114,16 +151,16 @@ public class Sphere {
                 int index = i * POINT_COUNT + j;
 
                 // mColor의 0번지는 빨간색.
-                colors[4 * index + 0 ] = mColor[0];
+                colors[4 * index + 0] = mColor[0];
 
                 // mColor의 1번지는 녹색
-                colors[4 * index + 1 ] = mColor[1];
+                colors[4 * index + 1] = mColor[1];
 
                 // mColor의 2번지는 파란색
-                colors[4 * index + 2 ] = mColor[2];
+                colors[4 * index + 2] = mColor[2];
 
                 // mColor의 3번지는 투명도
-                colors[4 * index + 3 ] = mColor[3];
+                colors[4 * index + 3] = mColor[3];
 
             }
         }
@@ -172,33 +209,76 @@ public class Sphere {
         mIndices.put(indices);
         mIndices.position(0);
 
+
+//        float[][] colorsArr = new float[mColorArr.length][POINT_COUNT * POINT_COUNT * 4];
+//
+//
+//        for (int f = 0; f < mColorArr.length; f++) {
+//
+//            float[] buf = mColorArr[f];
+//
+//            for (int i = 0; i < POINT_COUNT; i++) {
+//
+//                for (int j = 0; j < POINT_COUNT; j++) {
+//
+//                    int ind = i * POINT_COUNT + j;
+//
+//                    colorsArr[f][4 * ind + 0] = buf[0];
+//
+//                    colorsArr[f][4 * ind + 1] = buf[1];
+//
+//                    colorsArr[f][4 * ind + 2] = buf[2];
+//
+//                    colorsArr[f][4 * ind + 3] = buf[3];
+//                }
+//            }
+//
+//            mColorsArr[f] = ByteBuffer.allocateDirect(colorsArr[f].length * 4)
+//
+//                    .order(ByteOrder.nativeOrder()).asFloatBuffer();
+//
+//            mColorsArr[f].put(colorsArr[f]);
+//
+//            mColorsArr[f].position(0);
+
+//        }
+
+        float[][] colorsArr = new float[sColorArr.length][POINT_COUNT * POINT_COUNT * 4];
+
+
+        for (int f = 0; f < sColorArr.length; f++) {
+
+            float[] buf = sColorArr[f];
+
+            for (int i = 0; i < POINT_COUNT; i++) {
+
+                for (int j = 0; j < POINT_COUNT; j++) {
+
+                    int ind = i * POINT_COUNT + j;
+
+                    colorsArr[f][4 * ind + 0] = buf[0];
+
+                    colorsArr[f][4 * ind + 1] = buf[1];
+
+                    colorsArr[f][4 * ind + 2] = buf[2];
+
+                    colorsArr[f][4 * ind + 3] = buf[3];
+                }
+            }
+
+            sColorsArr[f] = ByteBuffer.allocateDirect(colorsArr[f].length * 4)
+
+                    .order(ByteOrder.nativeOrder()).asFloatBuffer();
+
+            sColorsArr[f].put(colorsArr[f]);
+
+            sColorsArr[f].position(0);
+
+        }
+
     }
 
-//    void setColors(){
-//        colors = new float[POINT_COUNT * POINT_COUNT * 4];
-//
-//
-//        for (int i = 0; i < POINT_COUNT; i++) {
-//            for (int j = 0; j < POINT_COUNT; j++) {
-//
-//                // 행, 렬로 되어있는 것을 일직선으로 직렬화
-//                int index = i * POINT_COUNT + j;
-//
-//                // mColor의 0번지는 빨간색.
-//                colors[4 * index + 0 ] = mColor[0];
-//
-//                // mColor의 1번지는 녹색
-//                colors[4 * index + 1 ] = mColor[1];
-//
-//                // mColor의 2번지는 파란색
-//                colors[4 * index + 2 ] = mColor[2];
-//
-//                // mColor의 3번지는 투명도
-//                colors[4 * index + 3 ] = mColor[3];
-//
-//            }
-//        }
-//    }
+
 
 
 
@@ -272,8 +352,10 @@ public class Sphere {
 
 
         // 색 float * rgba
-        GLES20.glVertexAttribPointer(color, 3, GLES20.GL_FLOAT,false,4 * 4,mColors);
-
+//        GLES20.glVertexAttribPointer(color, 3, GLES20.GL_FLOAT,false,4 * 4,mColors);
+//        GLES20.glVertexAttribPointer(color, 3, GLES20.GL_FLOAT, false,4*4, mColorsArr[currNO]);
+//        GLES20.glVertexAttribPointer(color, 3, GLES20.GL_FLOAT,false,4 * 4,sColorsBuffer);
+        GLES20.glVertexAttribPointer(color, 3, GLES20.GL_FLOAT, false,4*4, sColorsArr[selectNum]);
 
 
         // GPU 활성화
